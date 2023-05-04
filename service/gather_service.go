@@ -63,9 +63,18 @@ func GatherExchangeRatesAndSave() {
 		if strings.Contains(dsts, rate.CurrencyDst) {
 			fmt.Println("Save exchange rate: ", rate)
 
-			_, err = config.DB.NamedExec(model.InsertExchangeRate, rate)
+			var count int
+			err = config.DB.Get(&count, model.QueryExchangeRateExists, rate.CurrencySrc, rate.CurrencyDst, rate.ValidDate)
 			if err != nil {
-				fmt.Println("Save exchange rate error: ", err)
+				fmt.Println("Query exchange rate error: ", err)
+			}
+			if count > 0 {
+				fmt.Println("Exchange rate has exists: ", rate)
+			} else {
+				_, err = config.DB.NamedExec(model.InsertExchangeRate, rate)
+				if err != nil {
+					fmt.Println("Save exchange rate error: ", err)
+				}
 			}
 		}
 
