@@ -1,5 +1,7 @@
 package model
 
+import "encoding/xml"
+
 // ExchangeRate 汇率
 type (
 	ExchangeRate struct {
@@ -16,11 +18,28 @@ type (
 
 		// Rate 汇率
 		Rate float64 `db:"rate" json:"rate"`
-		// ValidDate 有效日期
-		ValidDate string `db:"valid_date" json:"validDate"`
+		// ValidMonth 有效日期
+		ValidMonth string `db:"valid_month" json:"validMonth"`
 		// GmtCreate 创建时间
 		GmtCreate string `db:"gmt_create" json:"gmtCreate"`
 		// GmtModified 修改时间
 		GmtModified string `db:"gmt_modified" json:"gmtModified"`
+	}
+
+	ExchangeRateXml struct {
+		XmlName    xml.Name  `xml:"publicerenKoersen"`
+		UpdateInfo UpdateXml `xml:"update"`
+		Rates      []RateXml `xml:"douaneMaandwisselkoers"`
+	}
+
+	UpdateXml struct {
+		Year  string `xml:"jaar"`
+		Month string `xml:"maand"`
+	}
+
+	RateXml struct {
+		Currency    string `xml:"muntCode"`
+		Description string `xml:"muntSoort"`
+		Rate        string `xml:"tariefInVreemdeValuta"`
 	}
 )

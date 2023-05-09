@@ -9,12 +9,13 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
+var cfgFile, year, month string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -31,7 +32,7 @@ exchange-rate-gather --config .gather.yaml
 		config.InitGlobalDatabaseConnection()
 
 		// gather exchange rate and save to database
-		service.GatherExchangeRatesAndSave()
+		service.GatherExchangeRatesFromNlAndSave(year, month)
 	},
 }
 
@@ -51,8 +52,9 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", ".gather.yaml", "config file (default is $HOME/.gather.yaml)")
-
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", ".gather.yaml", "配置文件(default is $HOME/.gather.yaml)")
+	rootCmd.PersistentFlags().StringVar(&year, "year", time.Now().Format("2006"), "年份,默认为当前年份")
+	rootCmd.PersistentFlags().StringVar(&month, "month", time.Now().Format("01"), "月份，默认为当前月份")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")

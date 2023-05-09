@@ -4,10 +4,10 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"encoding/json"
 	"exchange-rate-gather/service"
 	"fmt"
 	"github.com/spf13/cobra"
+	"log"
 )
 
 var currency string
@@ -25,22 +25,18 @@ exchange-rate-gather query --currency=USD`,
 
 		fmt.Printf("Get EUR to %s's exchage rate ...\n", currency)
 
-		rates, err := service.GatherExchangeRates()
-		if err != nil {
-			fmt.Println("GatherExchangeRates error:", err)
-			return
+		service := service.ExchangeRateForNlService{
+			Year:  year,
+			Month: month,
 		}
-
-		if currency == "" {
-			first, _ := json.Marshal(rates[0])
-			fmt.Println("Currency did not input, default print the first rate info: ", string(first))
-		} else {
-			for _, rate := range rates {
-				if rate.CurrencyDst == currency {
-					fmt.Printf("EUR to %s's current exchange rate = %f \n", currency, rate.Rate)
-					break
-				}
-			}
+		rates, err := service.GetExchangeRates()
+		if err != nil {
+			log.Println("Gather exchange rates error: ", err)
+		}
+		log.Println("EUR\tCurrency\tCurrency Description\tRate\tValid Month")
+		for _, rate := range rates {
+			// 想表格一样打印汇率信息
+			log.Printf("%s\t%s\t%s\t%f\t%s\n", rate.CurrencySrc, rate.CurrencyDst, rate.CurrencyDstDescription, rate.Rate, rate.ValidMonth)
 		}
 	},
 }
@@ -52,7 +48,9 @@ func init() {
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	queryCmd.PersistentFlags().StringVar(&currency, "currency", "", "指定货币，如：USD")
+	//queryCmd.PersistentFlags().StringVar(&currency, "currency", "", "指定货币，如：USD")
+
+	queryCmd.PersistentFlags().StringVar(&currency, "currency", "", "货币,(如：USD, 不指定返回所有货币的汇率)")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

@@ -42,7 +42,7 @@ func GatherExchangeRates() (info []model.ExchangeRate, err error) {
 				CurrencyDst:            currencyDst,
 				CurrencyDstDescription: currencyDstDes,
 				Rate:                   rate,
-				ValidDate:              time.Now().Format("2006-01-02"),
+				ValidMonth:             time.Now().Format("2006-01-02"),
 			})
 		})
 	}
@@ -64,7 +64,7 @@ func GatherExchangeRatesAndSave() {
 			fmt.Println("Save exchange rate: ", rate)
 
 			var count int
-			err = config.DB.Get(&count, model.QueryExchangeRateExists, rate.CurrencySrc, rate.CurrencyDst, rate.ValidDate)
+			err = config.DB.Get(&count, model.QueryExchangeRateExists, rate.CurrencySrc, rate.CurrencyDst, rate.ValidMonth)
 			if err != nil {
 				fmt.Println("Query exchange rate error: ", err)
 			}
@@ -79,5 +79,35 @@ func GatherExchangeRatesAndSave() {
 		}
 
 	}
+}
 
+// GatherExchangeRatesFromNlAndSave Get the exchange rates from nl
+func GatherExchangeRatesFromNlAndSave(year, month string) {
+	service := ExchangeRateForNlService{
+		Year:  year,
+		Month: month,
+	}
+	rates, err := service.GetExchangeRates()
+	if err != nil {
+		log.Println("Gather exchange rates error: ", err)
+		return
+	}
+	// save to database
+	for _, rate := range rates {
+		log.Println("Save exchange rate: ", rate)
+
+		var count int
+		err = config.DB.Get(&count, model.QueryExchangeRateExists, rate.CurrencySrc, rate.CurrencyDst, rate.ValidMonth)
+		if err != nil {
+			log.Println("Query exchange rate error: ", err)
+		}
+		if count > 0 {
+			log.Println("Exchange rate has exists: ", rate)
+		} else {
+			_, err = config.DB.NamedExec(model.InsertExchangeRate, rate)
+			if err != nil {
+				log.Println("Save exchange rate error: ", err)
+			}
+		}
+	}
 }
