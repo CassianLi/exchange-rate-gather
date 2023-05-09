@@ -35,8 +35,15 @@ exchange-rate-gather query --currency=USD`,
 		}
 		log.Println("EUR\tCurrency\tCurrency Description\tRate\tValid Month")
 		for _, rate := range rates {
-			// 想表格一样打印汇率信息
-			log.Printf("%s\t%s\t%s\t%f\t%s\n", rate.CurrencySrc, rate.CurrencyDst, rate.CurrencyDstDescription, rate.Rate, rate.ValidMonth)
+			if currency != "" {
+				if rate.CurrencyDst == currency {
+					log.Printf("%s\t%s\t%s\t%f\t%s\n", rate.CurrencySrc, rate.CurrencyDst, rate.CurrencyDstDescription, rate.Rate, rate.ValidMonth)
+					break
+				}
+			} else {
+				// 想表格一样打印汇率信息
+				log.Printf("%s\t%s\t%s\t%f\t%s\n", rate.CurrencySrc, rate.CurrencyDst, rate.CurrencyDstDescription, rate.Rate, rate.ValidMonth)
+			}
 		}
 	},
 }
